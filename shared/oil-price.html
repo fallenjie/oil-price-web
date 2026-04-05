@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2025 年中国 92 号汽油相关调价 — 发改委数据</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --up: #ef4444;
+        --down: #22c55e;
+        --flat: #64748b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: linear-gradient(160deg, var(--bg), #020617 55%);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.55;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 3rem;
+      }
+      h1 {
+        font-size: 1.45rem;
+        font-weight: 650;
+        margin: 0 0 0.35rem;
+        letter-spacing: 0.02em;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 0.92rem;
+        margin: 0 0 1.25rem;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 14px;
+        padding: 1rem 1rem 1.25rem;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(148, 163, 184, 0.12);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .dot {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .sw {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .sw.up {
+        background: var(--up);
+      }
+      .sw.down {
+        background: var(--down);
+      }
+      .sw.flat {
+        background: var(--flat);
+      }
+      .note {
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .note a {
+        color: #38bdf8;
+        text-decoration: none;
+      }
+      .note a:hover {
+        text-decoration: underline;
+      }
+      #chartHolder {
+        position: relative;
+        height: 420px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>2025 年国内成品油调价与 92 号汽油（估）</h1>
+      <p class="sub">
+        条形主数据：国家发展改革委每次公告中的<strong>汽油标准品</strong>每吨涨跌（元/吨）。92
+        号升价 ≈ 吨价 ÷ 1355（行业常用粗算，与卓创/隆众等精确折算可能相差约 0.01～0.02 元/升）。
+      </p>
+      <div class="card">
+        <div class="legend">
+          <span class="dot"><span class="sw up"></span> 上调（红）</span>
+          <span class="dot"><span class="sw down"></span> 下调（绿）</span>
+          <span class="dot"><span class="sw flat"></span> 搁浅 / 未调</span>
+        </div>
+        <div id="chartHolder">
+          <canvas id="oilChart" aria-label="2025 年汽油调价条形图"></canvas>
+        </div>
+        <p class="note">
+          数据来源：国家发展和改革委员会「新闻发布」栏目各期成品油价格调整通知（2025-01-02 至
+          2025-12-22，共 25 个调价窗口）。示例索引页：
+          <a href="https://www.ndrc.gov.cn/xwdt/xwfb/" rel="noreferrer">https://www.ndrc.gov.cn/xwdt/xwfb/</a>。具体到每次调整的链接见页面脚本内 <code>ndrc</code> 字段。
+        </p>
+      </div>
+    </div>
+    <script>
+      /** 2025 年国家发展改革委公告：汽油标准品每吨涨跌；搁浅为 0 */
+      const ADJUSTMENTS = [
+        { date: "2025-01-02", ton: 70, ndrc: "202501/t20250102_1395423.html" },
+        { date: "2025-01-16", ton: 340, ndrc: "202501/t20250116_1395727.html" },
+        { date: "2025-02-06", ton: 0, ndrc: "202502/t20250206_1396007.html" },
+        { date: "2025-02-19", ton: -170, ndrc: "202502/t20250219_1396225.html" },
+        { date: "2025-03-05", ton: -135, ndrc: "202503/t20250305_1396430.html" },
+        { date: "2025-03-19", ton: -280, ndrc: "202503/t20250319_1396715.html" },
+        { date: "2025-04-02", ton: 230, ndrc: "202504/t20250402_1396996.html" },
+        { date: "2025-04-17", ton: -480, ndrc: "202504/t20250417_1397240.html" },
+        { date: "2025-04-30", ton: 0, ndrc: "202504/t20250430_1397516.html" },
+        { date: "2025-05-19", ton: -230, ndrc: "202505/t20250519_1397793.html" },
+        { date: "2025-06-03", ton: 65, ndrc: "202506/t20250603_1398198.html" },
+        { date: "2025-06-17", ton: 260, ndrc: "202506/t20250617_1398486.html" },
+        { date: "2025-07-01", ton: 235, ndrc: "202507/t20250701_1398919.html" },
+        { date: "2025-07-15", ton: -130, ndrc: "202507/t20250715_1399195.html" },
+        { date: "2025-07-29", ton: 0, ndrc: "202507/t20250729_1399467.html" },
+        { date: "2025-08-12", ton: 0, ndrc: "202508/t20250812_1399754.html" },
+        { date: "2025-08-26", ton: -180, ndrc: "202508/t20250826_1400056.html" },
+        { date: "2025-09-09", ton: 0, ndrc: "202509/t20250909_1400343.html" },
+        { date: "2025-09-23", ton: 0, ndrc: "202509/t20250923_1400624.html" },
+        { date: "2025-10-13", ton: -75, ndrc: "202510/t20251013_1400937.html" },
+        { date: "2025-10-27", ton: -265, ndrc: "202510/t20251027_1401193.html" },
+        { date: "2025-11-10", ton: 125, ndrc: "202511/t20251110_1401464.html" },
+        { date: "2025-11-24", ton: -70, ndrc: "202511/t20251124_1401864.html" },
+        { date: "2025-12-08", ton: -55, ndrc: "202512/t20251208_1402287.html" },
+        { date: "2025-12-22", ton: -170, ndrc: "202512/t20251222_1402523.html" },
+      ];
+
+      const LITER_DIV = 1355;
+
+      const labels = ADJUSTMENTS.map((r) => r.date.slice(5));
+      const literEst = ADJUSTMENTS.map((r) =>
+        r.ton === 0 ? 0 : Math.round((r.ton / LITER_DIV) * 100) / 100
+      );
+      const colors = ADJUSTMENTS.map((r) => {
+        if (r.ton > 0) return "#ef4444";
+        if (r.ton < 0) return "#22c55e";
+        return "#64748b";
+      });
+
+      const base = "https://www.ndrc.gov.cn/xwdt/xwfb/";
+
+      const ctx = document.getElementById("oilChart");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "92 号汽油估算升价涨跌（元/升）",
+              data: literEst,
+              backgroundColor: colors,
+              borderColor: colors.map((c) => c),
+              borderWidth: 1,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title(items) {
+                  const i = items[0].dataIndex;
+                  return ADJUSTMENTS[i].date + " 起";
+                },
+                label(item) {
+                  const i = item.dataIndex;
+                  const row = ADJUSTMENTS[i];
+                  const lines = [
+                    `汽油标准品：${row.ton === 0 ? "搁浅 / 未调" : row.ton + " 元/吨"}`,
+                    row.ton === 0
+                      ? "92 号估算：—"
+                      : `92 号估算：约 ${literEst[i]} 元/升（÷${LITER_DIV}）`,
+                  ];
+                  return lines;
+                },
+                afterLabel(item) {
+                  const row = ADJUSTMENTS[item.dataIndex];
+                  return "发改委：" + (base + row.ndrc);
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: "#cbd5e1",
+                maxRotation: 60,
+                minRotation: 45,
+                autoSkip: false,
+                font: { size: 10 },
+              },
+              grid: { color: "rgba(148,163,184,0.12)" },
+            },
+            y: {
+              title: {
+                display: true,
+                text: "估算 92 号汽油每升涨跌（元/升）",
+                color: "#cbd5e1",
+              },
+              ticks: { color: "#cbd5e1" },
+              grid: { color: "rgba(148,163,184,0.12)" },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
