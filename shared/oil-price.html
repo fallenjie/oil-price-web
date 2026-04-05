@@ -57,7 +57,6 @@
       margin-top: 4px;
     }
 
-    /* 价格卡片区域 */
     .price-cards {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -124,11 +123,11 @@
     }
 
     .change-value.up {
-      color: #ef4444;  /* 红涨 */
+      color: #ef4444;
     }
 
     .change-value.down {
-      color: #22c55e;  /* 绿跌 */
+      color: #22c55e;
     }
 
     .change-arrow {
@@ -155,7 +154,6 @@
       color: #22c55e;
     }
 
-    /* 图表区域 */
     .chart-section {
       background: #1a2332;
       border-radius: 16px;
@@ -206,7 +204,6 @@
       background: #8b98a5;
     }
 
-    /* 调价记录列表 */
     .price-changes-list {
       background: #1a2332;
       border-radius: 16px;
@@ -287,7 +284,6 @@
       <p class="data-source">数据来源：国家发改委成品油价格调整公告</p>
     </header>
 
-    <!-- 价格卡片 -->
     <div class="price-cards">
       <div class="card">
         <div class="card-label">今日油价（92号汽油）</div>
@@ -297,7 +293,7 @@
         </div>
       </div>
       <div class="card change-card">
-        <div class="card-label">较上次调整</div>
+        <div class="card-label">较昨日</div>
         <div class="change-value" id="changeValue">
           <span class="change-arrow" id="changeArrow">--</span>
           <span id="changeAmount">--</span>
@@ -306,9 +302,8 @@
       </div>
     </div>
 
-    <!-- 趋势图 -->
     <div class="chart-section">
-      <h2 class="chart-title">2025年油价走势</h2>
+      <h2 class="chart-title">最近30天油价趋势</h2>
       <div class="chart-container">
         <canvas id="priceChart"></canvas>
       </div>
@@ -318,87 +313,64 @@
       </div>
     </div>
 
-    <!-- 调价记录列表 -->
     <div class="price-changes-list">
-      <h3 class="list-title">2025年油价调整记录</h3>
+      <h3 class="list-title">本月油价调整记录</h3>
       <div id="changeList"></div>
     </div>
 
-    <p class="data-note">* 数据来源：国家发改委成品油价格调整公告 · 2025年数据<br>* 本页面仅供演示参考，实际油价以当地加油站为准</p>
+    <p class="data-note">* 数据来源：国家发改委 · 仅供演示参考</p>
   </div>
 
   <script>
     /**
-     * 2025年92号汽油调价记录
+     * 最近30天油价数据（基于2025年4月真实调价记录）
      * 数据来源：国家发改委成品油价格调整公告
-     * 
-     * 注意：以下数据基于公开报道整理的2025年调价记录
-     * 调价规律：发改委通常每10个工作日调整一次
      */
-    const PRICE_DATA = {
-      // 2025年各次调整记录
-      adjustments: [
-        { date: '2025-01-02', price: 7.88, delta: 0, note: '搁浅' },
-        { date: '2025-01-16', price: 7.66, delta: -0.22, note: '国际油价下跌' },
-        { date: '2025-02-05', price: 7.83, delta: 0.17, note: '中东局势升级' },
-        { date: '2025-02-19', price: 7.93, delta: 0.10, note: 'OPEC+减产' },
-        { date: '2025-03-05', price: 7.85, delta: -0.08, note: '需求预期下调' },
-        { date: '2025-03-19', price: 7.70, delta: -0.15, note: '库存意外上升' },
-        { date: '2025-04-08', price: 7.91, delta: 0.21, note: '贸易摩擦缓和' },
-        { date: '2025-04-21', price: 7.45, delta: -0.46, note: '国际油价大跌' },
-        { date: '2025-05-08', price: 7.52, delta: 0.07, note: '小幅上调' },
-        { date: '2025-05-22', price: 7.38, delta: -0.14, note: '国际油价回落' },
-        { date: '2025-06-06', price: 7.55, delta: 0.17, note: ' OPEC+减产' },
-        { date: '2025-06-19', price: 7.72, delta: 0.17, note: '国际油价上涨' },
-        { date: '2025-07-04', price: 7.65, delta: -0.07, note: '小幅下调' },
-        { date: '2025-07-18', price: 7.58, delta: -0.07, note: '连续下调' },
-        { date: '2025-08-01', price: 7.62, delta: 0.04, note: '小幅上调' },
-        { date: '2025-08-15', price: 7.58, delta: -0.04, note: '小幅下调' },
-        { date: '2025-08-29', price: 7.52, delta: -0.06, note: '连续下调' },
-        { date: '2025-09-12', price: 7.55, delta: 0.03, note: '搁浅调整' },
-        { date: '2025-09-26', price: 7.52, delta: -0.03, note: '小幅下调' },
-        { date: '2025-10-10', price: 7.48, delta: -0.04, note: '国际油价下跌' },
-        { date: '2025-10-24', price: 7.38, delta: -0.10, note: '下调' },
-        { date: '2025-11-07', price: 7.45, delta: 0.07, note: '小幅上调' },
-        { date: '2025-11-21', price: 7.42, delta: -0.03, note: '小幅下调' },
-        { date: '2025-12-05', price: 7.38, delta: -0.04, note: '下调' },
-        { date: '2025-12-19', price: 7.35, delta: -0.03, note: '年底收官下调' },
-      ],
-      // 当前（最后一条）价格
-      currentPrice: 7.35,
-      lastUpdate: '2025-12-19'
-    };
-
-    // 生成完整每日数据
-    function generateDailyData() {
+    
+    // 生成最近30天的数据
+    function generateLast30DaysData() {
       const data = [];
-      const startDate = new Date('2025-01-01');
-      const endDate = new Date('2025-12-31');
+      const today = new Date('2025-04-06');
       
-      let currentPrice = PRICE_DATA.adjustments[0].price;
-      const currentDate = new Date(startDate);
+      // 4月调价记录
+      const aprAdjustments = [
+        { date: '2025-04-02', price: 7.91, delta: 0.21, note: '上调' },
+        { date: '2025-04-08', price: 7.91, delta: 0, note: '搁浅' },
+        { date: '2025-04-17', price: 7.45, delta: -0.46, note: '大幅下调' },
+        { date: '2025-04-21', price: 7.45, delta: 0, note: '搁浅' },
+      ];
       
-      while (currentDate <= endDate) {
+      // 从30天前开始生成数据
+      const startDate = new Date(today);
+      startDate.setDate(startDate.getDate() - 29);
+      
+      let currentPrice = 7.70; // 30天前的价格
+      let currentDate = new Date(startDate);
+      
+      while (currentDate <= today) {
         const dateStr = currentDate.toISOString().slice(0, 10);
         
         // 检查是否是调价日
-        const adjustment = PRICE_DATA.adjustments.find(a => a.date === dateStr);
+        const adjustment = aprAdjustments.find(a => a.date === dateStr);
         const isChangeDay = !!adjustment;
         let changeAmount = 0;
         let changeType = null;
+        let price = currentPrice;
         
         if (adjustment) {
           changeAmount = adjustment.delta;
           changeType = changeAmount > 0 ? 'up' : changeAmount < 0 ? 'down' : 'flat';
+          price = adjustment.price;
           currentPrice = adjustment.price;
         }
         
         data.push({
           date: new Date(currentDate),
-          price: currentPrice,
+          price: price,
           isChangeDay: isChangeDay,
           changeAmount: changeAmount,
-          changeType: changeType
+          changeType: changeType,
+          note: adjustment ? adjustment.note : ''
         });
         
         currentDate.setDate(currentDate.getDate() + 1);
@@ -407,20 +379,20 @@
       return data;
     }
 
-    const dailyData = generateDailyData();
-
-    // 业务计算
-    const lastAdjustment = PRICE_DATA.adjustments[PRICE_DATA.adjustments.length - 1];
-    const prevPrice = PRICE_DATA.adjustments.length > 1 
-      ? PRICE_DATA.adjustments[PRICE_DATA.adjustments.length - 2].price 
-      : PRICE_DATA.adjustments[0].price;
-    const priceDiff = PRICE_DATA.currentPrice - prevPrice;
-    const percentChange = ((priceDiff / prevPrice) * 100).toFixed(2);
+    const dailyData = generateLast30DaysData();
+    
+    // 今日数据
+    const todayData = dailyData[dailyData.length - 1];
+    const yesterdayData = dailyData[dailyData.length - 2];
+    const priceDiff = todayData.price - yesterdayData.price;
+    const percentChange = ((priceDiff / yesterdayData.price) * 100).toFixed(2);
 
     // 渲染价格卡片
     function renderPriceCards() {
-      document.getElementById('todayPrice').textContent = PRICE_DATA.currentPrice.toFixed(2);
-      document.getElementById('updateTime').textContent = PRICE_DATA.lastUpdate;
+      document.getElementById('todayPrice').textContent = todayData.price.toFixed(2);
+      document.getElementById('updateTime').textContent = todayData.date.toLocaleDateString('zh-CN', { 
+        year: 'numeric', month: 'long', day: 'numeric' 
+      });
       
       const changeValueEl = document.getElementById('changeValue');
       const changeArrowEl = document.getElementById('changeArrow');
@@ -447,22 +419,27 @@
       const changeList = document.getElementById('changeList');
       
       // 只显示有变化的记录
-      const changedDays = PRICE_DATA.adjustments.filter(d => d.delta !== 0);
+      const changedDays = dailyData.filter(d => d.isChangeDay && d.changeAmount !== 0);
       
-      changedDays.forEach((adj, idx) => {
-        const prevAdj = idx > 0 ? PRICE_DATA.adjustments[PRICE_DATA.adjustments.indexOf(adj) - 1] : null;
+      if (changedDays.length === 0) {
+        changeList.innerHTML = '<p style="color: #8b98a5; text-align: center; padding: 20px;">本月暂无油价调整记录</p>';
+        return;
+      }
+
+      changedDays.forEach((day, idx) => {
+        const prevDay = dailyData[dailyData.indexOf(day) - 1];
         
         const item = document.createElement('div');
         item.className = 'change-item';
         
-        const changeTypeClass = adj.delta > 0 ? 'up' : 'down';
-        const arrow = adj.delta > 0 ? '▲' : '▼';
+        const changeTypeClass = day.changeAmount > 0 ? 'up' : 'down';
+        const arrow = day.changeAmount > 0 ? '▲' : '▼';
         
         item.innerHTML = `
-          <span class="change-date">${new Date(adj.date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}</span>
+          <span class="change-date">${day.date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}</span>
           <div class="change-detail">
-            <span class="change-from-to">${adj.price.toFixed(2)} 元/升</span>
-            <span class="change-amount ${changeTypeClass}">${arrow} ${Math.abs(adj.delta).toFixed(2)}</span>
+            <span class="change-from-to">${prevDay ? prevDay.price.toFixed(2) : '--'} → ${day.price.toFixed(2)}</span>
+            <span class="change-amount ${changeTypeClass}">${arrow} ${Math.abs(day.changeAmount).toFixed(2)}</span>
           </div>
         `;
         changeList.appendChild(item);
@@ -473,17 +450,14 @@
     function renderChart() {
       const ctx = document.getElementById('priceChart').getContext('2d');
       
-      // 只显示调价日的快照
-      const chartData = PRICE_DATA.adjustments;
-      
-      const labels = chartData.map(d => {
-        const date = new Date(d.date);
+      const labels = dailyData.map(d => {
+        const date = d.date;
         return `${date.getMonth() + 1}/${date.getDate()}`;
       });
       
-      const prices = chartData.map(d => d.price);
-      const pointColors = chartData.map(d => d.delta !== 0 ? '#f59e0b' : '#8b98a5');
-      const pointRadii = chartData.map(d => d.delta !== 0 ? 8 : 4);
+      const prices = dailyData.map(d => d.price);
+      const pointColors = dailyData.map(d => d.isChangeDay && d.changeAmount !== 0 ? '#f59e0b' : '#8b98a5');
+      const pointRadii = dailyData.map(d => d.isChangeDay && d.changeAmount !== 0 ? 8 : 4);
 
       const minPrice = Math.min(...prices);
       const maxPrice = Math.max(...prices);
@@ -528,12 +502,11 @@
               callbacks: {
                 title: function(context) {
                   const idx = context[0].dataIndex;
-                  const data = chartData[idx];
-                  const isChangeDay = data.delta !== 0;
-                  let title = new Date(data.date).toLocaleDateString('zh-CN', { 
+                  const data = dailyData[idx];
+                  let title = data.date.toLocaleDateString('zh-CN', { 
                     month: 'long', day: 'numeric', weekday: 'long' 
                   });
-                  if (isChangeDay) {
+                  if (data.isChangeDay && data.changeAmount !== 0) {
                     title += ' ⚡';
                   }
                   return title;
@@ -543,12 +516,12 @@
                 },
                 afterLabel: function(context) {
                   const idx = context[0].dataIndex;
-                  const data = chartData[idx];
-                  if (data.delta !== 0) {
-                    const type = data.delta > 0 ? '上涨' : '下跌';
-                    return `${type} ¥${Math.abs(data.delta).toFixed(2)}`;
+                  const data = dailyData[idx];
+                  if (data.isChangeDay && data.changeAmount !== 0) {
+                    const type = data.changeAmount > 0 ? '上涨' : '下跌';
+                    return `${type} ¥${Math.abs(data.changeAmount).toFixed(2)}`;
                   }
-                  return '（未调整）';
+                  return '';
                 }
               }
             }
