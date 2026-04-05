@@ -9,7 +9,7 @@
 - **工作目录**: `D:\ai-dev-git\oil-price-web`
 
 ## 状态
-~~[TODO]~~ → ~~[DOING]~~ → **[TEST]** → [REVIEW] → [DONE]
+~~[TODO]~~ → ~~[DOING]~~ → ~~[TEST]~~ → ~~[REVIEW]~~ → **[DONE]** ✅
 
 ## Git 提交
 - **Commit**: 0ac0329 (第一版)
