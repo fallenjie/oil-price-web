@@ -4,9 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>国内油价查询 - 92号汽油实时价格</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
+    :root {
+      --bg: #0a0e14;
+      --card: #131b27;
+      --card-hover: #1a2433;
+      --border: #1e2a3a;
+      --text-primary: #e8edf3;
+      --text-secondary: #7a8ba3;
+      --text-muted: #4a5568;
+      --accent: #f0a500;
+      --accent-dim: rgba(240, 165, 0, 0.15);
+      --up: #ef4444;
+      --up-dim: rgba(239, 68, 68, 0.12);
+      --down: #22c55e;
+      --down-dim: rgba(34, 197, 94, 0.12);
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -14,97 +30,150 @@
     }
 
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: #0f1419;
-      color: #e7e9ea;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
       min-height: 100vh;
-      padding: 24px;
+      padding: 32px 24px;
+      line-height: 1.5;
     }
 
     .container {
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
     }
 
+    /* Header */
     header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     header h1 {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
-      color: #f59e0b;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    header h1::before {
-      content: '🛢️';
+      color: var(--accent);
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
     }
 
     .update-time {
       font-size: 13px;
-      color: #8b98a5;
+      color: var(--text-secondary);
     }
 
     .data-source {
       font-size: 12px;
-      color: #536471;
-      margin-top: 4px;
+      color: var(--text-muted);
+      margin-top: 3px;
     }
 
-    .price-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 32px;
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      border-radius: 14px;
+      padding: 5px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
     }
 
-    @media (max-width: 600px) {
-      .price-cards {
-        grid-template-columns: 1fr;
-      }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
     }
 
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #0a0e14;
+    }
+
+    .tab-btn .tab-icon {
+      font-size: 15px;
+    }
+
+    /* Tab Panels */
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card base */
     .card {
-      background: #1a2332;
+      background: var(--card);
       border-radius: 16px;
       padding: 24px;
       position: relative;
       overflow: hidden;
+      border: 1px solid var(--border);
     }
 
     .card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), #fbbf24);
+    }
+
+    /* Price Cards */
+    .price-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .price-cards { grid-template-columns: 1fr; }
     }
 
     .card-label {
-      font-size: 14px;
-      color: #8b98a5;
-      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
       font-weight: 500;
     }
 
     .price-value {
-      font-size: 48px;
+      font-size: 44px;
       font-weight: 700;
-      color: #f59e0b;
+      color: var(--accent);
       line-height: 1;
     }
 
     .price-unit {
-      font-size: 16px;
-      color: #8b98a5;
+      font-size: 15px;
+      color: var(--text-secondary);
       margin-left: 4px;
     }
 
@@ -115,231 +184,404 @@
     }
 
     .change-value {
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
-    .change-value.up {
-      color: #ef4444;
-    }
+    .change-value.up { color: var(--up); }
+    .change-value.down { color: var(--down); }
 
-    .change-value.down {
-      color: #22c55e;
-    }
-
-    .change-arrow {
-      font-size: 28px;
-    }
+    .change-arrow { font-size: 24px; }
 
     .change-percent {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 3px 10px;
       border-radius: 20px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 600;
-      margin-top: 8px;
+      margin-top: 6px;
       width: fit-content;
     }
 
-    .change-percent.up {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-    }
-
-    .change-percent.down {
-      background: rgba(34, 197, 94, 0.15);
-      color: #22c55e;
-    }
+    .change-percent.up { background: var(--up-dim); color: var(--up); }
+    .change-percent.down { background: var(--down-dim); color: var(--down); }
 
     /* Stats Section */
     .stats-section {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
-    @media (max-width: 600px) {
-      .stats-section {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 560px) {
+      .stats-section { grid-template-columns: 1fr; }
     }
 
     .stat-card {
-      background: #1a2332;
+      background: var(--card);
       border-radius: 12px;
-      padding: 16px;
+      padding: 14px;
       text-align: center;
+      border: 1px solid var(--border);
     }
 
     .stat-label {
-      font-size: 12px;
-      color: #8b98a5;
-      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .stat-value {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
-      color: #e7e9ea;
+      color: var(--text-primary);
+      font-family: 'Space Mono', monospace;
     }
 
-    .stat-value.up {
-      color: #ef4444;
-    }
+    .stat-value.up { color: var(--up); }
+    .stat-value.down { color: var(--down); }
 
-    .stat-value.down {
-      color: #22c55e;
-    }
-
+    /* Chart Section */
     .chart-section {
-      background: #1a2332;
+      background: var(--card);
       border-radius: 16px;
       padding: 24px;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
     }
 
-    .chart-title {
-      font-size: 18px;
+    .section-title {
+      font-size: 16px;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    .chart-title::before {
-      content: '📈';
+      color: var(--text-primary);
     }
 
     .chart-container {
       position: relative;
-      height: 350px;
+      height: 320px;
     }
 
     .legend-note {
-      margin-top: 16px;
-      font-size: 13px;
-      color: #8b98a5;
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
     .legend-dot {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       display: inline-block;
     }
 
-    .legend-dot.highlight {
-      background: #f59e0b;
-      box-shadow: 0 0 8px #f59e0b;
-    }
+    .legend-dot.highlight { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .legend-dot.normal { background: var(--text-muted); }
 
-    .legend-dot.normal {
-      background: #8b98a5;
-    }
-
+    /* Price Changes List */
     .price-changes-list {
-      background: #1a2332;
+      background: var(--card);
       border-radius: 16px;
       padding: 24px;
-    }
-
-    .list-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .list-title::before {
-      content: '🔔';
+      border: 1px solid var(--border);
     }
 
     .change-item {
-      padding: 16px 0;
-      border-bottom: 1px solid #2f3d4d;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .change-item:last-child {
-      border-bottom: none;
-    }
+    .change-item:last-child { border-bottom: none; }
 
     .change-item-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .change-date {
       font-size: 14px;
-      color: #e7e9ea;
+      color: var(--text-primary);
       font-weight: 600;
     }
 
     .change-badge {
-      font-size: 12px;
-      padding: 4px 8px;
+      font-size: 11px;
+      padding: 3px 8px;
       border-radius: 4px;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
-    .change-badge.up {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-    }
-
-    .change-badge.down {
-      background: rgba(34, 197, 94, 0.15);
-      color: #22c55e;
-    }
+    .change-badge.up { background: var(--up-dim); color: var(--up); }
+    .change-badge.down { background: var(--down-dim); color: var(--down); }
 
     .change-item-detail {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 12px;
+    }
+
+    .change-price { color: var(--text-secondary); }
+    .change-reason { color: var(--text-muted); font-style: italic; }
+
+    /* Calendar Tab */
+    .calendar-wrapper {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .calendar-nav-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .calendar-nav-btn:hover {
+      background: var(--card-hover);
+      color: var(--text-primary);
+      border-color: var(--accent);
+    }
+
+    .calendar-month-year {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-weekday {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 6px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
       font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: default;
+      position: relative;
+      transition: all 0.15s ease;
+      gap: 2px;
     }
 
-    .change-price {
-      color: #8b98a5;
+    .calendar-day:hover {
+      background: var(--card-hover);
     }
 
-    .change-reason {
-      color: #64748b;
+    .calendar-day.other-month {
+      color: var(--text-muted);
+      opacity: 0.4;
+    }
+
+    .calendar-day.today {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .calendar-day.adjustment {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .calendar-day.adjustment.up::after {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--up);
+      position: absolute;
+      bottom: 5px;
+    }
+
+    .calendar-day.adjustment.down::after {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--down);
+      position: absolute;
+      bottom: 5px;
+    }
+
+    .calendar-day.adjustment .day-price {
+      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 400;
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
+    .calendar-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .calendar-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .calendar-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .calendar-legend-dot.up { background: var(--up); }
+    .calendar-legend-dot.down { background: var(--down); }
+
+    /* Calendar detail panel */
+    .calendar-detail {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      min-height: 80px;
+    }
+
+    .calendar-detail-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .calendar-detail-empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 12px 0;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+    }
+
+    .detail-arrow {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .detail-arrow.up { color: var(--up); }
+    .detail-arrow.down { color: var(--down); }
+
+    .detail-info {
+      flex: 1;
+    }
+
+    .detail-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .detail-reason {
+      font-size: 11px;
+      color: var(--text-muted);
       font-style: italic;
     }
 
-    .data-note {
-      text-align: center;
-      margin-top: 24px;
+    .detail-price-badge {
       font-size: 12px;
-      color: #536471;
-      line-height: 1.6;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
     }
 
+    .detail-price-badge.up { background: var(--up-dim); color: var(--up); }
+    .detail-price-badge.down { background: var(--down-dim); color: var(--down); }
+
+    /* API Error Banner */
     .api-error-banner {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: #ef4444;
+      background: var(--up-dim);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: var(--up);
       display: none;
     }
 
-    .api-error-banner.show {
-      display: block;
+    .api-error-banner.show { display: block; }
+
+    /* Data Note */
+    .data-note {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Intro panel (当日油价 tab) */
+    .intro-section {
+      margin-bottom: 16px;
     }
   </style>
 </head>
@@ -355,199 +597,171 @@
       ⚠️ 实时API数据获取失败，已切换至基于公开数据的参考价格（详见下方声明）
     </div>
 
-    <div class="price-cards">
-      <div class="card">
-        <div class="card-label">今日油价（92号汽油）</div>
-        <div>
-          <span class="price-value" id="todayPrice">--</span>
-          <span class="price-unit">元/升</span>
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="today">
+        <span class="tab-icon">📌</span>当日油价
+      </button>
+      <button class="tab-btn" data-tab="trend">
+        <span class="tab-icon">📈</span>趋势图
+      </button>
+      <button class="tab-btn" data-tab="records">
+        <span class="tab-icon">📋</span>记录列表
+      </button>
+      <button class="tab-btn" data-tab="calendar">
+        <span class="tab-icon">📅</span>调价日历
+      </button>
+    </nav>
+
+    <!-- Tab 1: 当日油价 -->
+    <div class="tab-panel active" id="tab-today">
+      <div class="intro-section">
+        <div class="price-cards">
+          <div class="card">
+            <div class="card-label">今日油价（92号汽油）</div>
+            <div>
+              <span class="price-value" id="todayPrice">--</span>
+              <span class="price-unit">元/升</span>
+            </div>
+          </div>
+          <div class="card change-card">
+            <div class="card-label">较上次调整</div>
+            <div class="change-value" id="changeValue">
+              <span class="change-arrow" id="changeArrow">--</span>
+              <span id="changeAmount">--</span>
+            </div>
+            <div class="change-percent" id="changePercent">--</div>
+          </div>
+        </div>
+
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-label">较上月</div>
+            <div class="stat-value" id="vsLastMonth">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">本月最高/最低</div>
+            <div class="stat-value" id="highLow">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">本月均价</div>
+            <div class="stat-value" id="avgPrice">--</div>
+          </div>
         </div>
       </div>
-      <div class="card change-card">
-        <div class="card-label">较上次调整</div>
-        <div class="change-value" id="changeValue">
-          <span class="change-arrow" id="changeArrow">--</span>
-          <span id="changeAmount">--</span>
+
+      <p class="data-note" id="dataNote">
+        * 数据来源声明：<br>
+        - 国际原油价格：Sina Finance API (hq.sinajs.cn) - 布伦特/纽约原油期货<br>
+        - 国内油价：基于国际市场油价及国家发改委调价机制推算<br>
+        * 本页面数据仅供参考，实际油价以当地加油站为准
+      </p>
+    </div>
+
+    <!-- Tab 2: 趋势图 -->
+    <div class="tab-panel" id="tab-trend">
+      <div class="chart-section">
+        <h2 class="section-title">📈 最近30天油价趋势</h2>
+        <div class="chart-container">
+          <canvas id="priceChart"></canvas>
         </div>
-        <div class="change-percent" id="changePercent">--</div>
+        <div class="legend-note">
+          <span class="legend-dot highlight"></span> 价格变动日（金色高亮）
+          <span class="legend-dot normal" style="margin-left: 16px;"></span> 普通日期
+        </div>
       </div>
     </div>
 
-    <div class="stats-section">
-      <div class="stat-card">
-        <div class="stat-label">较上月</div>
-        <div class="stat-value" id="vsLastMonth">--</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">本月最高/最低</div>
-        <div class="stat-value" id="highLow">--</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">本月均价</div>
-        <div class="stat-value" id="avgPrice">--</div>
+    <!-- Tab 3: 记录列表 -->
+    <div class="tab-panel" id="tab-records">
+      <div class="price-changes-list">
+        <h3 class="section-title">📋 本月油价调整记录</h3>
+        <div id="changeList"></div>
       </div>
     </div>
 
-    <div class="chart-section">
-      <h2 class="chart-title">最近30天油价趋势</h2>
-      <div class="chart-container">
-        <canvas id="priceChart"></canvas>
-      </div>
-      <div class="legend-note">
-        <span class="legend-dot highlight"></span> 价格变动日（金色高亮）
-        <span class="legend-dot normal" style="margin-left: 16px;"></span> 普通日期
+    <!-- Tab 4: 调价日历 -->
+    <div class="tab-panel" id="tab-calendar">
+      <div class="calendar-wrapper">
+        <div class="calendar-header">
+          <button class="calendar-nav-btn" id="calPrev">‹</button>
+          <span class="calendar-month-year" id="calMonthYear">2026年4月</span>
+          <button class="calendar-nav-btn" id="calNext">›</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-legend">
+          <div class="calendar-legend-item">
+            <span class="calendar-legend-dot up"></span> 上调
+          </div>
+          <div class="calendar-legend-item">
+            <span class="calendar-legend-dot down"></span> 下调
+          </div>
+          <div class="calendar-legend-item">
+            <span class="legend-dot" style="background:var(--accent);box-shadow:0 0 4px var(--accent);"></span> 调价日
+          </div>
+        </div>
+        <div class="calendar-detail" id="calendarDetail">
+          <div class="calendar-detail-title">💡 选择调价日查看详情</div>
+          <div class="calendar-detail-empty">点击日历中的调价日查看详细信息</div>
+        </div>
       </div>
     </div>
-
-    <div class="price-changes-list">
-      <h3 class="list-title">本月油价调整记录</h3>
-      <div id="changeList"></div>
-    </div>
-
-    <p class="data-note" id="dataNote">
-      * 数据来源声明：<br>
-      - 国际原油价格：Sina Finance API (hq.sinajs.cn) - 布伦特/纽约原油期货<br>
-      - 国内油价：基于国际市场油价及国家发改委调价机制推算<br>
-      - 参考数据来源：globalpetrolprices.com, tradingeconomics.com<br>
-      * 本页面数据仅供参考，实际油价以当地加油站为准
-    </p>
   </div>
 
   <script>
-    /**
-     * 国内油价数据获取策略：
-     * 1. 优先尝试从Sina Finance API获取国际原油价格
-     * 2. 结合发改委调价规律，估算国内油价
-     * 3. 如API不可用，使用基于公开数据的参考价格
-     */
-
     // 全局变量
     let brentPrice = null;
     let wtiPrice = null;
 
-    /**
-     * 2026年3-4月发改委调价记录（基于公开报道整理）
-     * 数据来源：国家发改委成品油价格调整公告
-     */
     const ADJUSTMENTS = [
-      {
-        date: '2026-03-05',
-        price: 7.68,
-        delta: -0.12,
-        type: 'down',
-        reason: '国际油价下跌，成品油价格下调'
-      },
-      {
-        date: '2026-03-19',
-        price: 7.85,
-        delta: 0.17,
-        type: 'up',
-        reason: '中东局势紧张，国际油价上涨'
-      },
-      {
-        date: '2026-04-06',
-        price: 7.72,
-        delta: -0.13,
-        type: 'down',
-        reason: '国际油价震荡下行'
-      }
+      { date: '2026-03-05', price: 7.68, delta: -0.12, type: 'down', reason: '国际油价下跌，成品油价格下调' },
+      { date: '2026-03-19', price: 7.85, delta: 0.17, type: 'up', reason: '中东局势紧张，国际油价上涨' },
+      { date: '2026-04-06', price: 7.72, delta: -0.13, type: 'down', reason: '国际油价震荡下行' }
     ];
 
-    // 生成最近30天的每日数据
     function generateLast30DaysData() {
       const data = [];
       const today = new Date('2026-04-06');
-
       const startDate = new Date(today);
       startDate.setDate(startDate.getDate() - 29);
-
       let currentPrice = 7.70;
 
       for (let i = 0; i < 30; i++) {
         const currentDate = new Date(startDate);
         currentDate.setDate(currentDate.getDate() + i);
         const dateStr = currentDate.toISOString().slice(0, 10);
-
         const adjustment = ADJUSTMENTS.find(a => a.date === dateStr);
-
-        if (adjustment) {
-          currentPrice = adjustment.price;
-        }
-
-        data.push({
-          date: new Date(currentDate),
-          price: currentPrice,
-          adjustment: adjustment || null
-        });
+        if (adjustment) currentPrice = adjustment.price;
+        data.push({ date: new Date(currentDate), price: currentPrice, adjustment: adjustment || null });
       }
-
       return data;
     }
 
     const dailyData = generateLast30DaysData();
-
     const todayData = dailyData[29];
     const yesterdayData = dailyData[28];
     const priceDiff = todayData.price - yesterdayData.price;
     const percentChange = ((priceDiff / yesterdayData.price) * 100).toFixed(2);
 
-    // 尝试获取国际油价数据
-    async function fetchInternationalPrices() {
-      try {
-        const response = await fetch('https://hq.sinajs.cn/list=hf_OIL,hf_CL', {
-          headers: {
-            'Referer': 'https://finance.sina.com.cn',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        });
+    // ============ Tab Navigation ============
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
 
-        if (!response.ok) throw new Error('Network response was not ok');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+        if (tab === 'trend') renderChart();
+      });
+    });
 
-        const text = await response.text();
-
-        // 解析布伦特原油
-        const brentMatch = text.match(/hq_str_hf_OIL="([^"]+)"/);
-        if (brentMatch && brentMatch[1]) {
-          const fields = brentMatch[1].split(',');
-          if (fields.length > 0) {
-            brentPrice = parseFloat(fields[0]);
-          }
-        }
-
-        // 解析WTI原油
-        const wtiMatch = text.match(/hq_str_hf_CL="([^"]+)"/);
-        if (wtiMatch && wtiMatch[1]) {
-          const fields = wtiMatch[1].split(',');
-          if (fields.length > 0) {
-            wtiPrice = parseFloat(fields[0]);
-          }
-        }
-
-        // 如果成功获取国际油价，更新数据来源声明
-        if (brentPrice || wtiPrice) {
-          document.getElementById('dataSource').textContent =
-            `数据来源：Sina Finance API（国际原油） + 国家发改委调价机制`;
-          document.getElementById('dataNote').innerHTML = `
-            * 数据来源声明：<br>
-            - 国际原油价格（实时）：Sina Finance API (hq.sinajs.cn) - 布伦特原油 $${brentPrice?.toFixed(2) || '--'}/桶<br>
-            - 国内油价：基于国际市场油价及国家发改委调价机制推算<br>
-            - 参考数据来源：globalpetrolprices.com, tradingeconomics.com<br>
-            * 本页面数据仅供参考，实际油价以当地加油站为准
-          `;
-        }
-
-      } catch (error) {
-        console.warn('无法获取国际油价API数据，使用参考数据:', error.message);
-        document.getElementById('apiErrorBanner').classList.add('show');
-      }
-    }
-
-    // 渲染价格卡片
+    // ============ Price Cards ============
     function renderPriceCards() {
       document.getElementById('todayPrice').textContent = todayData.price.toFixed(2);
-      document.getElementById('updateTime').textContent = todayData.date.toLocaleDateString('zh-CN', {
-        year: 'numeric', month: 'long', day: 'numeric'
-      });
+      document.getElementById('updateTime').textContent = todayData.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 
       const changeValueEl = document.getElementById('changeValue');
       const changeArrowEl = document.getElementById('changeArrow');
@@ -569,9 +783,7 @@
       }
     }
 
-    // 渲染统计数据
     function renderStats() {
-      // 较上月（假设上月同期价格为7.82）
       const lastMonthPrice = 7.82;
       const vsLastMonth = todayData.price - lastMonthPrice;
       const vsLastMonthEl = document.getElementById('vsLastMonth');
@@ -583,37 +795,28 @@
         vsLastMonthEl.className = 'stat-value down';
       }
 
-      // 本月最高/最低
       const prices = dailyData.map(d => d.price);
       const high = Math.max(...prices);
       const low = Math.min(...prices);
       document.getElementById('highLow').textContent = `${high.toFixed(2)} / ${low.toFixed(2)}`;
-
-      // 本月均价
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
       document.getElementById('avgPrice').textContent = avg.toFixed(2);
     }
 
-    // 渲染调价记录列表
+    // ============ Change List ============
     function renderChangeList() {
       const changeList = document.getElementById('changeList');
-
       const adjustments = ADJUSTMENTS.filter(a => a.delta !== 0);
-
       if (adjustments.length === 0) {
-        changeList.innerHTML = '<p style="color: #8b98a5; text-align: center; padding: 20px;">本月暂无油价调整记录</p>';
+        changeList.innerHTML = '<p style="color: var(--text-secondary); text-align:center; padding:20px;">本月暂无油价调整记录</p>';
         return;
       }
-
       adjustments.forEach(adj => {
         const item = document.createElement('div');
         item.className = 'change-item';
-
         const typeClass = adj.type === 'up' ? 'up' : 'down';
         const arrow = adj.type === 'up' ? '▲' : '▼';
-
         const prevPrice = adj.price - adj.delta;
-
         item.innerHTML = `
           <div class="change-item-header">
             <span class="change-date">${new Date(adj.date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}</span>
@@ -622,40 +825,35 @@
           <div class="change-item-detail">
             <span class="change-price">${prevPrice.toFixed(2)} → ${adj.price.toFixed(2)} 元/升</span>
             <span class="change-reason">原因：${adj.reason}</span>
-          </div>
-        `;
+          </div>`;
         changeList.appendChild(item);
       });
     }
 
-    // 渲染图表
+    // ============ Chart ============
+    let chartInstance = null;
     function renderChart() {
+      if (chartInstance) return;
       const ctx = document.getElementById('priceChart').getContext('2d');
-
-      const labels = dailyData.map(d => {
-        const date = d.date;
-        return `${date.getMonth() + 1}/${date.getDate()}`;
-      });
-
+      const labels = dailyData.map(d => `${d.date.getMonth() + 1}/${d.date.getDate()}`);
       const prices = dailyData.map(d => d.price);
-      const pointColors = dailyData.map(d => d.adjustment ? '#f59e0b' : '#8b98a5');
-      const pointRadii = dailyData.map(d => d.adjustment ? 8 : 4);
-
+      const pointColors = dailyData.map(d => d.adjustment ? '#f0a500' : '#4a5568');
+      const pointRadii = dailyData.map(d => d.adjustment ? 7 : 3);
       const minPrice = Math.min(...prices);
       const maxPrice = Math.max(...prices);
 
-      new Chart(ctx, {
+      chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels: labels,
           datasets: [{
             label: '92号汽油价格（元/升）',
             data: prices,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            borderColor: '#f0a500',
+            backgroundColor: 'rgba(240, 165, 0, 0.08)',
             borderWidth: 2,
             fill: true,
-            tension: 0.3,
+            tension: 0.35,
             pointBackgroundColor: pointColors,
             pointBorderColor: pointColors,
             pointRadius: pointRadii,
@@ -665,44 +863,31 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: {
-            intersect: false,
-            mode: 'index'
-          },
+          interaction: { intersect: false, mode: 'index' },
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
-              backgroundColor: '#1a2332',
-              titleColor: '#e7e9ea',
-              bodyColor: '#e7e9ea',
-              borderColor: '#2f3d4d',
+              backgroundColor: '#131b27',
+              titleColor: '#e8edf3',
+              bodyColor: '#e8edf3',
+              borderColor: '#1e2a3a',
               borderWidth: 1,
               padding: 12,
               displayColors: false,
               callbacks: {
-                title: function(context) {
-                  const idx = context[0].dataIndex;
-                  const data = dailyData[idx];
-                  let title = data.date.toLocaleDateString('zh-CN', {
-                    month: 'long', day: 'numeric', weekday: 'long'
-                  });
-                  if (data.adjustment) {
-                    title += ' ⚡';
-                  }
-                  return title;
+                title: ctx => {
+                  const idx = ctx[0].dataIndex;
+                  const d = dailyData[idx];
+                  let t = d.date.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+                  if (d.adjustment) t += ' ⚡';
+                  return t;
                 },
-                label: function(context) {
-                  return `油价: ¥${context.parsed.y.toFixed(2)}`;
-                },
-                afterLabel: function(context) {
-                  const idx = context[0].dataIndex;
-                  const data = dailyData[idx];
-                  if (data.adjustment) {
-                    const adj = data.adjustment;
-                    const type = adj.type === 'up' ? '上涨' : '下跌';
-                    return `${type} ¥${Math.abs(adj.delta).toFixed(2)}`;
+                label: ctx => `油价: ¥${ctx.parsed.y.toFixed(2)}`,
+                afterLabel: ctx => {
+                  const d = dailyData[ctx[0].dataIndex];
+                  if (d.adjustment) {
+                    const a = d.adjustment;
+                    return `${a.type === 'up' ? '上涨' : '下跌'} ¥${Math.abs(a.delta).toFixed(2)}`;
                   }
                   return '';
                 }
@@ -711,30 +896,12 @@
           },
           scales: {
             x: {
-              grid: {
-                color: 'rgba(47, 61, 77, 0.5)',
-                drawBorder: false
-              },
-              ticks: {
-                color: '#8b98a5',
-                maxRotation: 45,
-                minRotation: 45,
-                font: {
-                  size: 11
-                }
-              }
+              grid: { color: 'rgba(30, 42, 58, 0.6)', drawBorder: false },
+              ticks: { color: '#7a8ba3', maxRotation: 45, minRotation: 45, font: { size: 11 } }
             },
             y: {
-              grid: {
-                color: 'rgba(47, 61, 77, 0.5)',
-                drawBorder: false
-              },
-              ticks: {
-                color: '#8b98a5',
-                callback: function(value) {
-                  return '¥' + value.toFixed(2);
-                }
-              },
+              grid: { color: 'rgba(30, 42, 58, 0.6)', drawBorder: false },
+              ticks: { color: '#7a8ba3', callback: v => '¥' + v.toFixed(2) },
               min: minPrice - 0.1,
               max: maxPrice + 0.1
             }
@@ -743,14 +910,141 @@
       });
     }
 
-    // 初始化
+    // ============ Calendar ============
+    let calYear = 2026;
+    let calMonth = 3; // 0-indexed, 3 = April
+
+    function getAdjustmentForDate(year, month, day) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return ADJUSTMENTS.find(a => a.date === dateStr) || null;
+    }
+
+    function isToday(year, month, day) {
+      const d = new Date();
+      return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      weekdays.forEach(w => {
+        const el = document.createElement('div');
+        el.className = 'calendar-weekday';
+        el.textContent = w;
+        grid.appendChild(el);
+      });
+
+      document.getElementById('calMonthYear').textContent = `${calYear}年${calMonth + 1}月`;
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+
+      // Prev month days
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day other-month';
+        dayEl.textContent = daysInPrevMonth - i;
+        grid.appendChild(dayEl);
+      }
+
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        const adj = getAdjustmentForDate(calYear, calMonth, d);
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
+
+        if (adj) dayEl.classList.add('adjustment', adj.type);
+        if (isToday(calYear, calMonth, d)) dayEl.classList.add('today');
+
+        dayEl.innerHTML = `<span>${d}</span>`;
+        if (adj) {
+          dayEl.innerHTML += `<span class="day-price">¥${adj.price.toFixed(2)}</span>`;
+          dayEl.style.cursor = 'pointer';
+          dayEl.addEventListener('click', () => showCalendarDetail(adj));
+        }
+
+        grid.appendChild(dayEl);
+      }
+
+      // Next month days
+      const totalCells = firstDay + daysInMonth;
+      const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      for (let i = 1; i <= remaining; i++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day other-month';
+        dayEl.textContent = i;
+        grid.appendChild(dayEl);
+      }
+    }
+
+    function showCalendarDetail(adj) {
+      const container = document.getElementById('calendarDetail');
+      const arrow = adj.type === 'up' ? '▲' : '▼';
+      const prevPrice = adj.price - adj.delta;
+      container.innerHTML = `
+        <div class="calendar-detail-title">⚡ ${new Date(adj.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })} 调价</div>
+        <div class="detail-item">
+          <span class="detail-arrow ${adj.type}">${arrow}</span>
+          <div class="detail-info">
+            <div class="detail-date">${prevPrice.toFixed(2)} → ${adj.price.toFixed(2)} 元/升</div>
+            <div class="detail-reason">${adj.reason}</div>
+          </div>
+          <span class="detail-price-badge ${adj.type}">${adj.type === 'up' ? '+' : ''}${adj.delta.toFixed(2)} 元/升</span>
+        </div>`;
+    }
+
+    document.getElementById('calPrev').addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendar();
+    });
+
+    document.getElementById('calNext').addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendar();
+    });
+
+    // ============ International Prices ============
+    async function fetchInternationalPrices() {
+      try {
+        const response = await fetch('https://hq.sinajs.cn/list=hf_OIL,hf_CL', {
+          headers: { 'Referer': 'https://finance.sina.com.cn', 'User-Agent': 'Mozilla/5.0' }
+        });
+        if (!response.ok) throw new Error('Network error');
+        const text = await response.text();
+        const brentMatch = text.match(/hq_str_hf_OIL="([^"]+)"/);
+        if (brentMatch && brentMatch[1]) {
+          const fields = brentMatch[1].split(',');
+          if (fields.length > 0) brentPrice = parseFloat(fields[0]);
+        }
+        const wtiMatch = text.match(/hq_str_hf_CL="([^"]+)"/);
+        if (wtiMatch && wtiMatch[1]) {
+          const fields = wtiMatch[1].split(',');
+          if (fields.length > 0) wtiPrice = parseFloat(fields[0]);
+        }
+        if (brentPrice || wtiPrice) {
+          document.getElementById('dataSource').textContent = `数据来源：Sina Finance API（国际原油） + 国家发改委调价机制`;
+          document.getElementById('dataNote').innerHTML = `
+            * 数据来源声明：<br>
+            - 国际原油价格（实时）：Sina Finance API (hq.sinajs.cn) - 布伦特原油 $${brentPrice?.toFixed(2) || '--'}/桶<br>
+            - 国内油价：基于国际市场油价及国家发改委调价机制推算<br>
+            * 本页面数据仅供参考，实际油价以当地加油站为准`;
+        }
+      } catch (error) {
+        document.getElementById('apiErrorBanner').classList.add('show');
+      }
+    }
+
+    // ============ Init ============
     document.addEventListener('DOMContentLoaded', async function() {
       renderPriceCards();
       renderStats();
       renderChangeList();
-      renderChart();
-
-      // 尝试获取国际油价API数据
+      renderCalendar();
       await fetchInternationalPrices();
     });
   </script>
